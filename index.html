@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGISTRATION CARD / РЕГИСТРАЦИОННЫЙ ТАЛОН</title>
+    <style>
+        body { font-family: "Times New Roman", Times, Arial, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; color: #000; }
+        .input-form { max-width: 600px; margin: 0 auto 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; font-family: Arial; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .submit-btn { background-color: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        
+        /* استایل صد در صد مشابه فرم چاپی اصلی */
+        .registration-card { display: none; width: 210mm; min-height: 297mm; background: white; padding: 16mm 14mm; margin: 0 auto; box-sizing: border-box; }
+        .card-header { display: flex; align-items: flex-start; gap: 12px; font-weight: bold; font-size: 11px; line-height: 1.3; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 1px solid #000; }
+        .header-left { flex-shrink: 0; display: flex; align-items: center; }
+        .header-right { flex: 1; display: flex; flex-direction: column; gap: 1px; text-align: left; }
+        .header-logo { width: 74px; height: auto; display: block; }
+        .header-line { margin: 0; font-size: 10.2px; line-height: 1.2; }
+        .card-title { text-align: center; margin: 6px 0 10px 0; }
+        .header-title { font-size: 13px; font-weight: bold; margin: 2px 0 2px; letter-spacing: 0.5px; line-height: 1.05; }
+        .header-subtitle { font-size: 9.6px; font-weight: normal; margin: 0; font-style: italic; line-height: 1.2; }
+        
+        .main-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        .main-table td { border: 1px solid #000; padding: 5px 7px; font-size: 10.6px; vertical-align: top; word-wrap: break-word; line-height: 1.25; font-family: Arial, sans-serif; }
+        .main-table tr.center-row td { vertical-align: middle; }
+        .qr-cell { width: 25%; vertical-align: middle; padding: 4px 5px; }
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 120px; padding: 4px 0; }
+        #qrcode { width: 96px; height: 96px; display: inline-block; margin: 0; }
+        #qrcode img,
+        #qrcode canvas { width: 110px !important; height: 110px !important; display: block; }
+        .qr-caption { display: block; font-size: 9px; font-weight: normal; line-height: 1.2; }
+        .table-title-cell { padding: 8px 6px; text-align: center; font-weight: bold; font-size: 11px; }
+        .table-subtitle { font-size: 9px; font-weight: normal; margin-top: 2px; line-height: 1.25; }
+        .table-label { padding: 6px 10px; vertical-align: top; }
+        .table-value { width: 40%; padding: 8px 9px; vertical-align: top; min-height: 28px; }
+        .lang-desc { display: block; font-size: 9.5px; font-weight: normal; color: #111; margin-bottom: 2px; }
+        .data-value { font-size: 11.5px; font-weight: bold; margin-top: 3px; text-transform: none; font-family: Arial, sans-serif; }
+        
+        .photo-box { width: 135px; height: 175px; border: 1px solid #000; text-align: center; vertical-align: middle !important; font-size: 11px; color: #444; }
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; text-align: center; }
+        #qrcode { margin-top: 8px; margin-bottom: 4px; }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .input-form { display: none; }
+            .registration-card { display: block; padding: 0; margin: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="input-form" id="inputFormArea">
+    <h2 style="text-align: center; margin-top: 0; font-family: Arial;">فرم شخصی‌سازی شده (۱۰۰٪ مشابه نمونه)</h2>
+    <form id="regForm" onsubmit="saveToDatabase(event)">
+        <div class="form-group"><label>نام خانوادگی و نام (Surname, Name):</label><input type="text" id="inName" required placeholder="ХУССАЙНИ САЙЕД АКБАР"></div>
+        <div class="form-group"><label>تاریخ تولد (Date of birth):</label><input type="text" id="inDob" required placeholder="26.06.1972"></div>
+        <div class="form-group"><label>ملیت (Citizenship):</label><input type="text" id="inCitizen" required placeholder="AFGHANISTAN"></div>
+        <div class="form-group"><label>شماره پاسپورت (Passport Number):</label><input type="text" id="inPassport" required placeholder="006348"></div>
+        <div class="form-group"><label>اعتبار پاسپورت (Validity Period):</label><input type="text" id="inDocValid" required placeholder="09.09.2026"></div>
+        <div class="form-group"><label>تاریخ ورود (Date of entry):</label><input type="text" id="inEntry" required placeholder="05.06.2026"></div>
+        <div class="form-group"><label>آدرس محل اقامت (Registered Address):</label><input type="text" id="inAddress" required placeholder="г. Бишкек, р-н Ленинский..."></div>
+        <div class="form-group"><label>ثبت نام از تاریخ (From):</label><input type="text" id="inRegFrom" required placeholder="10.06.2026"></div>
+        <div class="form-group"><label>ثبت نام تا تاریخ (To):</label><input type="text" id="inRegTo" required placeholder="09.09.2026"></div>
+        <div class="form-group"><label>نام میزبان (The host):</label><input type="text" id="inHost" required placeholder="КАСЫМОВА АКЫЛЖАН АСЕЕВНА"></div>
+        <div class="form-group"><label>مدارک میزبان (Host Passport/ID):</label><input type="text" id="inHostDoc" required placeholder="ID1042107 KGZ"></div>
+        <button type="submit" class="submit-btn">ذخیره آنلاین در دیتابیس و صدور کارت 💾</button>
+    </form>
+</div>
+
+<!-- ساختار چاپی نهایی صد در صد مشابه عکس -->
+<div id="printCard" class="registration-card">
+    <div class="card-header">
+        <div class="header-left">
+            <img src="kyrgiz_logo.svg" alt="Kyrgyz Logo" class="header-logo">
+        </div>
+        <div class="header-right">
+            <div class="header-line">Кыргыз Республикасынын Президентинин Иш башкармасына караштуу "Кызмат" мамлекеттик мекемеси</div>
+            <div class="header-line">Государственное учреждение "Кызмат" при Управлении делами Президента Кыргызской Республики</div>
+            <div class="header-line">State Institution "Kyzmat" under The Presidential Affairs Department of the Kyrgyz Republic</div>
+        </div>
+    </div>
+    <table class="main-table">
+        <colgroup>
+            <col style="width: 35%;">
+            <col style="width: 25%;">
+            <col style="width: 40%;">
+        </colgroup>
+        <tr>
+            <td colspan="3" class="table-title-cell">
+                КАТТОО ТАЛОНУ / РЕГИСТРАЦИОННЫЙ ТАЛОН / REGISTRATION CARD
+                <div class="table-subtitle">чет өлкөлүк жаранды жана жарандыгы жок инсанды жашаган жери боюнча / иностранного гражданина и лица без гражданства по месту пребывания / foreign citizen and persons without citizenship at the place of stay</div>
+            </td>
+        </tr>
+        <tr class="center-row">
+            <td class="photo-box" style="width: 35%;">
+                <span style="display:block; font-size:10.5px; line-height:1.2; padding-top:16px;">Сүрөт<br>Фото<br>Photo</span>
+            </td>
+            <td style="width: 40%; vertical-align: middle; padding: 10px 7px; border-left: 1px solid #000; border-right: 1px solid #000;">
+                <span style="display:block; font-size:10px; font-weight:normal;">Каттоонун номуру / Номер регистрации / Number registration:</span>
+                <span id="lblRegNum" style="font-weight: bold; font-size: 11px; margin-top: 4px; display: block;"></span>
+            </td>
+            <td class="qr-cell">
+                <div class="qr-section">
+                    <span class="qr-caption">QR код / QR code</span>
+                    <div id="qrcode"></div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Фамилиясы, аты, атасынын аты / Фамилия, имя, отчество / Surname, Name, Middle name:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblName"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Туулган күнү / Дата рождения / Date of birth:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblDob"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Жарандыгы / Гражданство / Citizenship:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblCitizen"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Инсандын документи (Түрү, сериясы, номери) / Документ, удостоверяющий личность (Вид, серия, номер) / The identity document (Type, Series, Number):</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblPassport"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Документтин жарактуу мөөнөтү / Срок действия документа / Document validity period:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblDocValid"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Кирген датасы / Дата въезда / Date of entry:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblEntry"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Келген жеринин дареги боюнча катталды / Зарегистрирован по месту пребывания по адресу / Registered at the place of stay:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblAddress"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Катталган күнү / Дата регистрации / Date of registration:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblFrom"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Чейин / До / To:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblTo"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Жашоого укук берген документ / Документ, дающий право на проживание / A document granting the right to stay:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value">-</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Кабыл алган тарап / Принимающая сторона / The host:</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblHost"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="table-label" colspan="2">
+                <span class="lang-desc">Инсандын документи (Түрү, сериясы, номери) / Документ, удостоверяющий личность (Вид, серия, номер) / The identity document (Type, Series, Number):</span>
+            </td>
+            <td class="table-value">
+                <div class="data-value" id="lblHostDoc"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxPsTCzPNvbJoNvuhaX4jpgAEOeclVAkg",
+    authDomain: "my-visa-project-6ffef.firebaseapp.com",
+    projectId: "my-visa-project-6ffef",
+    storageBucket: "my-visa-project-6ffef.firebasestorage.app",
+    messagingSenderId: "797168825681",
+    appId: "1:797168825681:web:4ea9776be4b6edc2530f70",
+    measurementId: "G-RZ6FB91PDJ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  async function saveToDatabase(event) {
+    event.preventDefault();
+
+    const randomRegNum = Math.floor(10000000000000 + Math.random() * 90000000000000).toString();
+
+    const userData = {
+      name: document.getElementById('inName').value,
+      dob: document.getElementById('inDob').value,
+      citizen: document.getElementById('inCitizen').value,
+      passport: document.getElementById('inPassport').value,
+      docValid: document.getElementById('inDocValid').value,
+      entry: document.getElementById('inEntry').value,
+      address: document.getElementById('inAddress').value,
+      regFrom: document.getElementById('inRegFrom').value,
+      regTo: document.getElementById('inRegTo').value,
+      host: document.getElementById('inHost').value,
+      hostDoc: document.getElementById('inHostDoc').value,
+      regNum: randomRegNum
+    };
+
+    try {
+      await setDoc(doc(db, 'registrations', randomRegNum), userData);
+      alert('اطلاعات با موفقیت در دیتابیس آنلاین ذخیره شد!');
+      showCard(userData);
+    } catch (error) {
+      alert('خطا در ذخیره‌سازی: ' + error);
+    }
+  }
+
+  window.saveToDatabase = saveToDatabase;
+
+  function showCard(data) {
+    document.getElementById('inputFormArea').style.display = 'none';
+    document.getElementById('printCard').style.display = 'block';
+
+    document.getElementById('lblName').innerText = data.name;
+    document.getElementById('lblDob').innerText = data.dob;
+    document.getElementById('lblCitizen').innerText = data.citizen;
+    document.getElementById('lblPassport').innerText = data.passport;
+    document.getElementById('lblDocValid').innerText = data.docValid;
+    document.getElementById('lblEntry').innerText = data.entry;
+    document.getElementById('lblAddress').innerText = data.address;
+    document.getElementById('lblFrom').innerText = data.regFrom;
+    document.getElementById('lblTo').innerText = data.regTo;
+    document.getElementById('lblHost').innerText = data.host;
+    document.getElementById('lblHostDoc').innerText = data.hostDoc;
+    document.getElementById('lblRegNum').innerText = data.regNum;
+
+    const currentUrl = window.location.href.split('?')[0];
+    const scanUrl = currentUrl + '?id=' + data.regNum;
+
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), { text: scanUrl, width: 96, height: 96 });
+  }
+
+  window.onload = async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    if (userId) {
+      document.getElementById('inputFormArea').style.display = 'none';
+      try {
+        const docSnap = await getDoc(doc(db, 'registrations', userId));
+        if (docSnap.exists()) {
+          showCard(docSnap.data());
+        } else {
+          document.body.innerHTML = '<h1 style="text-align:center;color:red;">خطا: این کارت در سیستم معتبر نیست!</h1>';
+        }
+      } catch (error) {
+        document.body.innerHTML = '<h1 style="text-align:center;color:red;">خطا در خواندن اطلاعات: ' + error + '</h1>';
+      }
+    }
+  };
+</script>
+</body>
+</html>
